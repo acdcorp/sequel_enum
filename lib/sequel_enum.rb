@@ -39,18 +39,31 @@ module Sequel
             super self.class.symbolize(hash)
           end
 
-          define_method "#{column}=" do |value|
-            index = self.class.enums[column].rassoc(value)
-            self[column] = index && index.first
-          end
+          # removed for now, too restricting
+          # unless self.respond_to?(column)
+          #   define_method "#{column}=" do |value|
+          #     index = self.class.enums[column].rassoc(value)
+          #     self[column] = index && index.first
+          #   end
+          #
+          #   define_method "#{column}" do
+          #     self.class.enums[column].fetch(self[column], nil)
+          #   end
+          # end
 
-          define_method "#{column}" do
-            self.class.enums[column].fetch(self[column], nil)
-          end
+          # removed for now, not sure if useful in most cases
+          # values.each do |key, value|
+          #   define_method "#{value}?" do
+          #     self.send(column) == value
+          #   end unless self.respond_to?(column)
+          # end
 
-          values.each do |key, value|
-            define_method "#{value}?" do
-              self.send(column) == value
+          # defines validates_enums, can be called from validate method
+          unless self.respond_to?(:validates_enums)
+            define_method 'validates_enums' do
+              self.class.enums.each do |col, vals|
+                self.validates_includes vals.values.map(&:to_s), col
+              end
             end
           end
 
