@@ -59,14 +59,20 @@ module Sequel
           #   end unless self.respond_to?(column)
           # end
 
+          define_method :all_enums do
+            all_enums = self.class.superclass.enums if self.class.superclass.respond_to?(:enums)
+            all_enums ||= {}
+            all_enums = all_enums.merge(self.class.enums) \
+                        if self.class.respond_to?(:enums) && self.class.enums
+            all_enums
+          end
+
           # defines validates_enums, can be called from validate method
           unless self.respond_to?(:validates_enums)
             define_method :validates_enums do
-              self.class.superclass.validates_enums \
-                if self.class.superclass.respond_to?(:validates_enums)
-              self.class.enums.each do |col, vals|
+              self.all_enums.each do |col, vals|
                 self.validates_includes vals.values.map(&:to_s), col, allow_blank: true
-              end if self.class.enums
+              end if self.all_enums
             end
           end
 
