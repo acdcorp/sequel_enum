@@ -65,7 +65,7 @@ module Sequel
               self.class.superclass.validates_enums \
                 if self.class.superclass.respond_to?(:validates_enums)
               self.class.enums.each do |col, vals|
-                self.validates_includes vals.values.map(&:to_s), col
+                self.validates_includes vals.values.map(&:to_s), col, allow_blank: true
               end if self.class.enums
             end
           end
