@@ -11,11 +11,12 @@ module Sequel
         attr_reader :enums
 
         def symbolize(hash)
+          hash = self.superclass.symbolize(hash) if self.superclass.respond_to?(:symbolize)
           self.enums.each do |key, val|
             s_key = key.to_s
             hash[key] = hash[key].to_sym if hash[key]
             hash[s_key] = hash[s_key].to_sym if hash[s_key]
-          end
+          end if self.enums
           hash
         end
 
@@ -60,10 +61,12 @@ module Sequel
 
           # defines validates_enums, can be called from validate method
           unless self.respond_to?(:validates_enums)
-            define_method 'validates_enums' do
+            define_method :validates_enums do
+              self.class.superclass.validates_enums \
+                if self.class.superclass.respond_to?(:validates_enums)
               self.class.enums.each do |col, vals|
                 self.validates_includes vals.values.map(&:to_s), col
-              end
+              end if self.class.enums
             end
           end
 
