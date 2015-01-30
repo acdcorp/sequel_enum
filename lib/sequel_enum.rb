@@ -71,7 +71,7 @@ module Sequel
           unless self.respond_to?(:validates_enums)
             define_method :validates_enums do
               self.all_enums.each do |col, vals|
-                self.validates_includes vals.values.map(&:to_s), col, allow_blank: true
+                self.validates_includes vals.values.map(&:to_sym), col, allow_blank: true
               end if self.all_enums
             end
           end
